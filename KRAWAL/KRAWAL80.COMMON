@@ -1,0 +1,320 @@
+C                                                                               
+      INTEGER    STZHD1, ANZAST, STWRT1,                                        
+     1           STZHD2, ANZDGR, STWRT2,                                        
+     2           STZMDT, ANZDTT,                                                
+     3           STZNDT, ANZTRB                                                 
+      INTEGER    NTAKEN                                                         
+C                                                                               
+C ***** INTEGER BEI TURB.RECHN. RESIDENT *****                                  
+C                                                                               
+      INTEGER     CDAT57                                                        
+      INTEGER     CDAT59                                                        
+C                                                                               
+C     ***** KRLF *****                                                          
+C                                                                               
+*     INTEGER    CDAT51                                                         
+      REAL         KC1   ,KC21  ,KC23  ,KC24  ,KC25  ,KC50                      
+      REAL    LS                                                                
+      REAL    LSZ                                                               
+      LOGICAL  QKOND ,QGAE  ,QGABD ,QZEIC ,QTLES ,QTROM ,QDISC                  
+      DIMENSION  ANIND (10), ZNIND (10), TXNIND(10)                             
+      DIMENSION   IZWZ(10), IZWX(10)                                            
+      DIMENSION KTAUFB(15)                                                      
+      DIMENSION  G     (75,2), LS    (75), ETAUOP(75),                          
+     1           E1T   (75,2), STFDI (75), VOLUME(75),                          
+     2           E2T   (75,2), BRTLE (75), PSI   (75),                          
+     3           PT    (75,2), BRTLA (75), ETAI  (75),                          
+     4           H0    (75,2), PUNORM(75), PHI   (75),                          
+     5           C2GES (75,2), PUMAX (75),                                      
+     6           DFAKT (75,2), PSTFMX(75),                                      
+     7           T1T   (75  ), TSTFMX(75),                                      
+     8           T2T   (75  ), OEFFNG(75),                                      
+     9           DI    (75  ), ETAIOP(75)                                       
+      DIMENSION  XG    (75), YG    (75),                                        
+     1           XE1T  (75), YE1T  (75),                                        
+     2           XE2T  (75), YE2T  (75),                                        
+     3           XPT   (75), YPT   (75),                                        
+     4           XH0   (75), YH0   (75),                                        
+     5           XC2GES(75), YC2GES(75),                                        
+     6           XDFAKT(75), YDFAKT(75)                                         
+      DIMENSION   ETAUST(2),BEPS (2),                                           
+     1            CVENT (5), DELTAP(5), GVENT (5), VENDUR(5),BEAUFG(5)          
+C                                                                               
+      DIMENSION   UPM(2)                                                        
+      DIMENSION  DMAST (6), SPAST (6), FASTB (6), ZZAST (6), PNAST(6)           
+      DIMENSION  TALMIN(6), TALMAX(6), TABANZ(6), TASAX (6), TAOEFF(6),         
+     1           TAZLE (6), TAZLA (6), NTAPRF(6), TASAXE (6),                   
+     2           HS1MIN(6), HS1MAX(6), HSZMIN(6), HSZMAX(6), TAKF1 (6),         
+     3           TAKFZ (6), TAFDP(6) , NUEMIN(6), NUEMAX(6)                     
+      DIMENSION  KRANZZ(7 ), STZHD1(4), NSTFZ (15), LTGAB (6,15),               
+     1           KRZEIN(7 ), STZHD2(4),                                         
+     2           IRSTF (7 ), STZMDT(4), ISTFGR(15),                             
+     3           LTGABT(6 ), STZNDT(4), ISTOBU(15),                             
+     4           ITTEND(7 ), NTTETB(4)                                          
+      DIMENSION MUKASO(75),  KT(225)                                            
+      DIMENSION   GFDE  (4), GABDE (4), TLSTGE(4), VMECHE(4), ETAGE (4),        
+     1            GMFIXE(4), GMD1A (4), GMD2A (4), DVERBR(4), ARBTA (4),        
+     2            PNE   (7), PKOND (4), PKOP  (4), ETAKOP(4), PN4   (4),        
+     3            P0E   (7), T0E   (7), ETWK  (4), EWKZUK(4), DREQUE(4),        
+     4            NVENT (7), NRMFIE(4), NRMVAE(4), NITRE (4), TNPROZ(5)         
+      DIMENSION             EWKEFF(4),            EVROR (4), ELROR (4),         
+     1           EDAROR(4), EDSROR(4), EKULF (4), ESPZRZ(4), EBKNDM(4),         
+     2           ETHOR (4), ETVER (4), EKOKE (4), EHVOR (4), ZFLUTE(4),         
+     3           ZKONDE(4), FWERST(4), FTEMP (4)                                
+      DIMENSION CDAT60 (27)                                                     
+      DIMENSION CDAT62(15)                                                      
+      DIMENSION CDAT61(31)                                                      
+      DIMENSION CDAT63(100)                                             E 000580C
+C
+      COMMON  PLTG  (160), TNMAX (  4), XYZXYZ     , PENTG0     ,PIN60 ,        
+     1        ELTG  (160), TNMIN (  4), SUQL       , PENTG      ,GSTOBU,        
+     2        GLTG  (160), TNNORM(  4), SUGL       , PULEIS     ,KFELER,        
+     3        VMXLTG(160), LSZ   (  4), WAUFW      , SUMGZU     ,               
+     4        PZUT  ( 10), ZWISP ( 10), TEND0      , SUMGAB     ,               
+     5        EZUT  ( 10), GZUW       , TEND       , SUMQZU     ,               
+     6        GZUT  ( 10), DMJEKW     , PEND0      , SUMQAB     ,               
+     7        PABT  ( 10), PEMIN      , PEND       , DETA       ,               
+     8        EABT  ( 10), PEMAX      , TENTG0     , SPERRD     ,               
+     9        GABT  ( 10), PROZ       , TENTG      , SPERRQ     ,               
+     A        PENTN0( 46)                                                       
+      COMMON  A1    , A2    , A3    , A4    , A5    , A6    , A7    ,           
+     1        A8    , A9    , A10   , Z1    , Z2    , Z3    , Z4    ,           
+     2        Z5    , Z6    , Z7    , Z8    , Z9    , Z10   , TX1   ,           
+     3        TX2   , TX3   , TX4   , TX5   , TX6   , TX7   , TX8   ,           
+     4        TX9   , TX10  ,                                                   
+     5        PFABRE(4), PFABR (4), GFABR (4)                                   
+      COMMON  ANZAST, ANZDGR, ANZDTT, ANZTRB, STWRT1, STWRT2, INDEX ,           
+     1        IND   , INDSTB, IFALL , IWEI1 , IANF  , IEND  , ITRB  ,           
+     2        JANF  , JJANF , NVOR  , I     , II    , J     , JJ    ,           
+     3        K     , KK    , KR    , K1    , K2    ,                           
+     4        IZ1   , IZ2   , IZ3   , IZ4   , IZ5   , IZ6   , IZ7   ,           
+     5        IZ8   , IZ9   , IZ10  , IX1   , IX2   , IX3   , IX4   ,           
+     6        IX5   , IX6   , IX7   , IX8   , IX9   , IX10  , IOUT  ,           
+     7        ITURB ( 5), NFABRE (4), LAUFEN,                                   
+     8        NSPZU (10), NSPAB (10),NRTRB(46)                                  
+      COMMON  ILTG  (160), LTGSAM(12,35)                                        
+      COMMON LZUT(10),LABT(10),LIGHT(10)                                        
+C                                                                               
+C  COMMON ALLGEMEIN - LOGICALS                                                  
+C                                                                               
+      COMMON   QKOND , QGAE  (4), QGABD , QZEIC , QTLES ,                       
+     1         QTROM , QDISC                                                    
+C                                                                               
+C     ***** WECHSELBLOCK REAL *****                                             
+C ***** TEILTURBINE *****                                                       
+C                                                                               
+      COMMON  CDAT52 (2444)                                                     
+      COMMON CDAT53( 9)                                                         
+      COMMON  CDAT54(30)                                                        
+      COMMON  CDAT56(111)                                                       
+      COMMON CDAT57(189)                                                        
+      COMMON CDAT55(129)                                                        
+      COMMON  PW    (60), SSTEU (60),                                           
+     1        DTS  (60), QBZWM (60),                                            
+     2        TWAUS (60), OMEGA0(40),                                           
+     3        EWAUS (60), GKNULL(40),                                           
+     4        GWAS  (60), TSNULL(40),                                           
+     5        DTK   (60), OMEGAR(40),                                           
+     6        EKONDW(60), GWNULL(40),                                           
+     7        DEKOND(60), GDNULL(40),                                           
+     8        VERLE (60), TDNULL(40),                                           
+     9        VERLP(60), TENULL(40),                                            
+     A        DPLTG(40), DPLTGA(40),                                            
+     B        DELTG(40), DPENTG ,                                               
+     C        DPSCHL(4)                                                         
+C                                                                               
+C     ***** KONDENSATION *****                                                  
+      COMMON    CDAT58(101)                                                     
+      COMMON  NTYP0 (60),KAUSLF(60),LLTG  (40),                                 
+     1        NTYP  (60),KATZE1(60),MAFGWE( 4),                                 
+     2        N1    (60),KATZE2(60),NWASKE( 4),NBLTG (60,8),                    
+     3        N2    (60),INDDT (60),ISYMB ( 4),                                 
+     4        NN1   (60),KREIHE(60),IKOP  ( 4),                                 
+     5        NN2   (60),KRUECK(60)                                             
+     6      ,IHENDE , INENDE , KENTG  , IST10  , IST11 , IST12 , IST13 ,        
+     7       NVORW  , NVWHD , NVWAND , IENDVW , NOPTKO , NTYPKO                 
+C                                                                               
+      COMMON /COKE/ KT1,KT2,KT3,KT4,KT5,KT6,KT7,KT8,KT9,KT10,KT11,              
+     1         KT12, KT13, KT14, KT15                                           
+      COMMON /DAT59/ CDAT59(301)                                                
+      COMMON /ETACO/                                                            
+     1AK1 , AK2 , AK3 , AK4 , AK5 , AK6 , AK7 , AK8 , AK9 , AK10 ,              
+     2AK11, AK12, AK13, AK14, AK15, AK16, AK17, AK18, AK19, AK20 ,              
+     3AK21, AK22,                                                               
+     4                              AK36, AK37, AK38, AK39, AK40,               
+     5AK151,AK191,AKS                                                           
+C                                                                               
+C *****ETA-KONSTANTEN*****                                                      
+C                                                                               
+      COMMON /ETARST/                                                           
+     1  ETA01  , ETA02  , ACRKS  , ACR1   , ACR2   , ACR3   , ACR4   ,          
+     2  ACR5   , ACR6   , ACR7   , ACR8   , ACR9   , ACR10,ACR11,ACR12          
+C                                                                               
+C *****RSTF-KONSTANTEN*****                                                     
+C                                                                               
+      COMMON /PROCO/                                                            
+     1   AC1  , AC2  , AC3  , AC4  , AC5  , AC6  , AC7  , AC8  , AC9  ,         
+     2   AC10 , AC11 , AC12 , AC13 , AC14 , AC15 , AC16 , AC17 , AC18 ,         
+     3   AC19 , AC20 , AC21 , AC22 , AC23 , AC24 , AC25 , AC26 , AC27 ,         
+     4   AC28 , AC29 , AC30 , AC31                                              
+C                                                                               
+C *****PROFIL KONSTANTEN*****                                                   
+C                                                                               
+C  PROFILKONSTANTEN FUER KRAWAL80                                       E 000580
+C  BISHERIGE PROFILKONSTANTEN WERDEN ZUNAECHST NOCH IM                  E 000580
+C  PROGRAMM GELASSEN                                                    E 000580
+      COMMON /ETA80/                                                    E 000580
+     *  TC1  , TC2  , TC3  , TC4  , TC5  , TC6  , TC7  , TC8  , TC9  ,  E 000580
+     *  TC10 , TC11 , TC12 , TC13 , TC14 , TC15 , TC16 , TC17 , TC18 ,  E 000580
+     *  TC19 , TC20 , TC21 , TC22 , TC23 , TC24 , TC25 , TC26 , TC27 ,  E 000580
+     *  TC28 , TC29 , TC30 , TC31 , TC32 , TC33 , TC34 , TC35 , TC36 ,  E 000580
+     *  TC37 , TC38 , TC39 , TC40 , TC41 , TC42 , TC43 , TC44 , TC45 ,  E 000580
+     *  TC46 , TC47 , TC48 , TC49 , TC50 , TC51 , TC52 , TC53 , TC54 ,  E 000580
+     *  TC55 , TC56 , TC57 , TC58 , TC59 , TC60 , TC61 , TC62 , TC63 ,  E 000580
+     *  TC64 , TC65 , TC66 , TC67 , TC68 , TC69 , TC70 , TC71 , TC72 ,  E 000580
+     *  TC73 , TC74 , TC75 , TC76 , TC77 , TC78 , TC79 , TC80 , TC81 ,  E 000580
+     *  TC82 , TC83 , TC84 , TC85 , TC86 , TC87 , TC88 , TC89 , TC90 ,  E 000580
+     *  TC91 , TC92 , TC93 , TC94 , TC95 , TC96 , TC97 , TC98 , TC99 ,  E 000580
+     *  TC100                                                           E 000580
+C
+      EQUIVALENCE  (ANIND (1),A1),                                              
+     1             (ZNIND (1),Z1),                                              
+     2             (TXNIND(1),TX1)                                              
+C                                                                               
+C  COMMONBLOCK  INT  DAUERND RESIDENT                                           
+C                                                                               
+      EQUIVALENCE (IZWZ(1),IZ1),(IZWX(1),IX1)                                   
+      EQUIVALENCE (KT1,KTAUFB(1))                                               
+      EQUIVALENCE (XG    (1),G     (1,1)),(YG    (1),G     (1,2)),              
+     1            (XE1T  (1),E1T   (1,1)),(YE1T  (1),E1T   (1,2)),              
+     2            (XE2T  (1),E2T   (1,1)),(YE2T  (1),E2T   (1,2)),              
+     3            (XPT   (1),PT    (1,1)),(YPT   (1),PT    (1,2)),              
+     4            (XH0   (1),H0    (1,1)),(YH0   (1),H0    (1,2)),              
+     5            (XC2GES(1),C2GES (1,1)),(YC2GES(1),C2GES (1,2)),              
+     6            (XDFAKT(1),DFAKT (1,1)),(YDFAKT(1),DFAKT(1,2))                
+C                                                                               
+      EQUIVALENCE (LS    (1),CDAT52(   1)), (STFDI (1),CDAT52(  76)),           
+     1            (BRTLE (1),CDAT52( 151)), (BRTLA (1),CDAT52( 226)),           
+     2            (PUNORM(1),CDAT52( 301)), (PUMAX (1),CDAT52( 376)),           
+     3            (PSTFMX(1),CDAT52( 451)), (TSTFMX(1),CDAT52( 526)),           
+     4            (OEFFNG(1),CDAT52( 601)), (ETAIOP(1),CDAT52( 676)),           
+     5            (ETAUOP(1),CDAT52( 751)), (VOLUME(1),CDAT52( 826)),           
+     6            (PSI   (1),CDAT52( 901)), (ETAI  (1),CDAT52( 976)),           
+     7            (PHI   (1),CDAT52(1051))                                      
+      EQUIVALENCE (XG    (1),CDAT52(1126)), (YG    (1),CDAT52(1201)),           
+     1            (XE1T  (1),CDAT52(1276)), (YE1T  (1),CDAT52(1351)),           
+     2            (XE2T  (1),CDAT52(1426)), (YE2T  (1),CDAT52(1501)),           
+     3            (XPT   (1),CDAT52(1576)), (YPT   (1),CDAT52(1651)),           
+     4            (XH0   (1),CDAT52(1726)), (YH0   (1),CDAT52(1801)),           
+     5            (XC2GES(1),CDAT52(1876)), (YC2GES(1),CDAT52(1951)),           
+     6            (EPSMAX   ,CDAT52(2026)), (EPS11    ,CDAT52(2027)),           
+     7            (GMAXG1   ,CDAT52(2028)), (GMING1   ,CDAT52(2029)),           
+     8            (EPSMIN   ,CDAT52(2030)), (EPSEND   ,CDAT52(2031)),           
+     9            (DNGG     ,CDAT52(2032))                                      
+      EQUIVALENCE (ETAUST(1),CDAT52(2033)), (BEPS  (1),CDAT52(2035)),           
+     1            (P0T      ,CDAT52(2037)), (T0T      ,CDAT52(2038)),           
+     2            (PNT      ,CDAT52(2039)), (WT0      ,CDAT52(2040)),           
+     3            (VBEZ     ,CDAT52(2041)), (DPBEZ    ,CDAT52(2042)),           
+     4            (ZETAV    ,CDAT52(2043)), (CVENT (1),CDAT52(2044)),           
+     5            (DELTAP(1),CDAT52(2049)), (GVENT (1),CDAT52(2054)),           
+     6            (VENDUR(1),CDAT52(2059)), (BEAUFG(1),CDAT52(2064)),           
+     7            (EPSMXE   ,CDAT52(2069)),                                     
+     8            (XDFAKT(1),CDAT52(2070)), (YDFAKT(1),CDAT52(2145))            
+      EQUIVALENCE (DI    (1),CDAT52(2220)), (T1T   (1),CDAT52(2295)),           
+     1            (T2T   (1),CDAT52(2370))                                      
+C                                                                               
+C ***** STFGR *****                                                             
+C                                                                               
+      EQUIVALENCE (XUPM     ,UPM   (   1)), (YUPM     ,UPM   (   2)),           
+     1            (XUPM     ,CDAT53(   1)), (YUPM     ,CDAT53(   2)),           
+     2            (AV       ,CDAT53(   3)), (FLUT     ,CDAT53(   4)),           
+     3            (ZZIST    ,CDAT53(   5)), (DMIST    ,CDAT53(   6)),           
+     4            (DELTLE   ,CDAT53(   7)), (DELTLA   ,CDAT53(   8)),           
+     5            (STFZ     ,CDAT53(   9))                                      
+C                                                                               
+C ***** ASTOBU *****                                                            
+      EQUIVALENCE (DMAST (1),CDAT54(   1)), (SPAST (1),CDAT54(   7)),           
+     1            (FASTB (1),CDAT54(  13)), (ZZAST (1),CDAT54(  19)),           
+     2            (PNAST (1),CDAT54(  25))                                      
+C                                                                               
+C     ***** BEM *****  STFGR-INDEX                                              
+      EQUIVALENCE (TALMIN(1),CDAT56(   1)), (TALMAX(1),CDAT56(   7)),           
+     1            (TABANZ(1),CDAT56(  13)), (TASAX (1),CDAT56(  19)),           
+     2            (TAOEFF(1),CDAT56(  25)), (TAZLE (1),CDAT56(  31)),           
+     3            (TAZLA (1),CDAT56(  37)), (TASAXE(1),CDAT56(  43)),           
+     4            (STFDI1   ,CDAT56(  49)), (STFDIZ   ,CDAT56(  50)),           
+     5            (HS1MAX(1),CDAT56(  51)), (HSZMAX(1),CDAT56(  57)),           
+     6            (HS1MIN(1),CDAT56(  63)), (HSZMIN(1),CDAT56(  69)),           
+     7            (STFZAL   ,CDAT56(  75)), (NTAPRF(1),CDAT56(  76)),           
+     8            (NTAKEN   ,CDAT56(  12)), (TAKF1 (1),CDAT56(  82)),           
+     9            (TAKFZ (1),CDAT56(  88)), (TAFDP (1),CDAT56(  94))            
+      EQUIVALENCE (NUEMIN(1),CDAT56( 100)), (NUEMAX(1),CDAT56( 106))            
+      EQUIVALENCE (KRANZZ(1),CDAT57(   1)), (KRZEIN(1),CDAT57(   8)),           
+     1            (IRSTF (1),CDAT57(  15)), (LTGABT(1),CDAT57(  22)),           
+     2            (STZHD1(1),CDAT57(  28)), (STZHD2(1),CDAT57(  32)),           
+     3            (STZMDT(1),CDAT57(  36)), (STZNDT(1),CDAT57(  40)),           
+     4            (NSTFZ (1),CDAT57(  44)), (ISTFGR(1),CDAT57(  59)),           
+     5            (ISTOBU(1),CDAT57(  74)), (LTGAB(1,1),CDAT57( 89)),           
+     6            (ITTEND(1),CDAT57( 179)), (NTTETB(1),CDAT57( 186))            
+C                                                                               
+C  ***** TEILT. INTEGERS *****                                                  
+C                                                                               
+      EQUIVALENCE  (MUKASO(1),CDAT59(226)), (KT    (1),CDAT59(1)) ,             
+     1             (NADUES   ,CDAT59(301))                                      
+C                                                                               
+C ***** TEILL (OPKODR) INDEX LASTPUNKT *****                                    
+C                                                                               
+      EQUIVALENCE (GFDE  (1),CDAT55(   1)), (GABDE (1),CDAT55(   5)),           
+     1            (TLSTGE(1),CDAT55(   9)), (VMECHE(1),CDAT55(  13)),           
+     2            (ETAGE (1),CDAT55(  17)), (GMFIXE(1),CDAT55(  21)),           
+     3            (GMD1A (1),CDAT55(  25)), (GMD2A (1),CDAT55(  29)),           
+     4            (DVERBR(1),CDAT55(  33)), (ARBTA (1),CDAT55(  37)),           
+     5            (PKOP  (1),CDAT55(  41)), (ETAKOP(1),CDAT55(  45)),           
+     6            (PN4   (1),CDAT55(  49)), (ETWK  (1),CDAT55(  53)),           
+     7            (EWKZUK(1),CDAT55(  57)), (DREQUE(1),CDAT55(  61)),           
+     8            (P0E   (1),CDAT55(  65)), (T0E   (1),CDAT55(  72)),           
+     9            (QVERBR   ,CDAT55(  79)), (THERMN   ,CDAT55(  80))            
+      EQUIVALENCE (NVENT (1),CDAT55(  81)), (NRMFIE(1),CDAT55(  88)),           
+     1            (NRMVAE(1),CDAT55(  92)), (NITRE (1),CDAT55(  96)),           
+     2            (TNPROZ(1),CDAT55( 110)), (TEILBW   ,CDAT55( 111)),           
+     3            (TPQUER   ,CDAT55( 112)), (EEQUER   ,CDAT55( 113)),           
+     4            (EAQUER   ,CDAT55( 114)), (PNE   (1),CDAT55( 115)),           
+     5            (PKOND (1),CDAT55( 122)), (PKSP     ,CDAT55( 127)),           
+     6            (ETAKSP   ,CDAT55( 128)), (HIKSP    ,CDAT55( 129))            
+C                                                                               
+C ***** KREISLAUF *****                                                         
+C                                                                               
+      EQUIVALENCE (EWKEFF(1),CDAT58(   1)), (EVROR (1),CDAT58(   5)),           
+     1            (ELROR (1),CDAT58(   9)), (EDAROR(1),CDAT58(  13)),           
+     2            (EDSROR(1),CDAT58(  17)), (EKULF (1),CDAT58(  21)),           
+     3            (ESPZRZ(1),CDAT58(  25)), (EBKNDM(1),CDAT58(  29)),           
+     4            (ETHOR (1),CDAT58(  33)), (ETVER (1),CDAT58(  37)),           
+     5            (EKOKE (1),CDAT58(  41)), (EHVOR (1),CDAT58(  45)),           
+     6            (ZFLUTE(1),CDAT58(  49)), (ZKONDE(1),CDAT58(  53)),           
+     7            (FWERST(1),CDAT58(  57)), (FTEMP (1),CDAT58(  61))            
+      EQUIVALENCE (RORWE    ,CDAT58(  65)), (DELTKO   ,CDAT58(  66)),           
+     1            (FRADIO   ,CDAT58(  67)), (TBENU    ,CDAT58(  68)),           
+     2            (HKMUSS   ,CDAT58(  69)), (CKELER   ,CDAT58(  70)),           
+     3            (WHO      ,CDAT58(  71)), (KC21     ,CDAT58(  72)),           
+     4            (ETAP     ,CDAT58(  73)), (KC1      ,CDAT58(  74)),           
+     5            (ETAM     ,CDAT58(  75)), (KC50     ,CDAT58(  76)),           
+     6            (WHOBY    ,CDAT58(  77)), (KC23     ,CDAT58(  78)),           
+     7            (ETAPBY   ,CDAT58(  79)), (KC24     ,CDAT58(  80)),           
+     8            (ETAMBY   ,CDAT58(  81)), (KC25     ,CDAT58(  82)),           
+     9            (RC2      ,CDAT58(  83)), (RC3      ,CDAT58(  84))            
+      EQUIVALENCE (RC4      ,CDAT58(  85)), (PC27     ,CDAT58(  86)),           
+     1            (PC5      ,CDAT58(  87)), (PC6      ,CDAT58(  88)),           
+     2            (PC7      ,CDAT58(  89)), (PC8      ,CDAT58(  90)),           
+     3            (PC9      ,CDAT58(  91)), (WC20     ,CDAT58(  92)),           
+     4            (WC21     ,CDAT58(  93)), (WC22     ,CDAT58(  94)),           
+     5            (WKEFF    ,CDAT58(  95)), (FLAECE   ,CDAT58(  96)),           
+     6            (HWK      ,CDAT58(  97)), (HKOND    ,CDAT58(  98)),           
+     7            (WKMIN    ,CDAT58(  99)), (GVERWL   ,CDAT58( 100)),           
+     8                                      (TVERWL   ,CDAT58( 101))            
+      EQUIVALENCE (AK1      ,CDAT60(   1))                                      
+C                                                                               
+C$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$        
+      EQUIVALENCE (ETA01    ,CDAT62(   1))                                      
+      EQUIVALENCE (AC1      ,CDAT61(   1))                                      
+      EQUIVALENCE (TC1       ,CDAT63(   1))  
+C                                                                               
